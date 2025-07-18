@@ -1,16 +1,21 @@
 // overwrite uni-cli-shared utils normalizePagePath
 import { parse, resolve } from 'node:path'
 import { existsSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { isApp, platform, inputDir as uniInputDir } from '@uni-helper/uni-env'
 
-// @ts-expect-error ignore
-import * as uniUtils from '@dcloudio/uni-cli-shared/dist/utils.js'
+function importCJSCompatible(modulePath: string) {
+  const url = typeof import.meta?.url === 'string' ? import.meta.url : __filename
 
-// @ts-expect-error ignore
-import * as uniResolve from '@dcloudio/uni-cli-shared/dist/resolve.js'
+  const _require = createRequire(url)
+  const module = _require(modulePath)
 
-// @ts-expect-error ignore
-import * as constants from '@dcloudio/uni-cli-shared/dist/constants.js'
+  return module.default ?? module
+}
+
+const uniUtils = importCJSCompatible('@dcloudio/uni-cli-shared/dist/utils.js')
+const uniResolve = importCJSCompatible('@dcloudio/uni-cli-shared/dist/resolve.js')
+const constants = importCJSCompatible('@dcloudio/uni-cli-shared/dist/constants.js')
 
 // 解决 MP 和 APP 平台页面文件不存在时不继续执行的问题
 // @ts-expect-error ignore
